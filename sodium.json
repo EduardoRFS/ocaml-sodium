@@ -1,5 +1,6 @@
 {
   "esy": {
+    "buildsInSource": true,
     "build": [["make", "-j4"]],
     "install": "make PREFIX=$cur__install install"
   },
