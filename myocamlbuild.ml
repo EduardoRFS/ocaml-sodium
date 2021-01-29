@@ -1,6 +1,8 @@
 open Ocamlbuild_plugin;;
 open Ocamlbuild_pack;;
 
+let sodium_includedir = Sys.getenv "SODIUM_INCLUDE_PATH" in
+let sodium_libdir = Sys.getenv "SODIUM_LIB_PATH" in
 let ctypes_libdir = Sys.getenv "CTYPES_LIB_DIR" in
 let ocaml_libdir = Sys.getenv "OCAML_LIB_DIR" in
 
@@ -13,6 +15,8 @@ dispatch begin
       ~deps:["lib_gen/%_types_detect.c"]
       (fun env build ->
          Cmd (S[A"cc";
+                A("-I"); A sodium_includedir;
+                A("-L"); A sodium_libdir;
                 A("-I"); A ctypes_libdir;
                 A("-I"); A ocaml_libdir;
                 A"-o";
@@ -48,12 +52,12 @@ dispatch begin
       "lib_gen/%_bindings.ml" "lib/%_bindings.ml";
 
     flag ["c"; "compile"] & S[A"-ccopt"; A"-I/usr/local/include"];
-    flag ["c"; "ocamlmklib"] & A"-L/usr/local/lib";
+    flag ["c"; "ocamlmklib"] & S[A"-L/usr/local/lib"; A("-L" ^ sodium_libdir)];
     flag ["ocaml"; "link"; "native"; "program"] &
       S[A"-cclib"; A"-L/usr/local/lib"];
 
     (* Linking cstubs *)
-    flag ["c"; "compile"; "use_ctypes"] & S[A"-I"; A ctypes_libdir];
+    flag ["c"; "compile"; "use_ctypes"] & S[A"-I"; A ctypes_libdir; A("-I"); A sodium_includedir];
     flag ["c"; "compile"; "debug"] & A"-g";
 
     (* Linking sodium *)
